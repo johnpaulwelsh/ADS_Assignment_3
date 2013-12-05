@@ -15,6 +15,7 @@ public class Test {
 		if (args.length < 1) {
 			System.out.println("Usage: java prefix.Test DICTIONARY_FILENAME");
 		} else {
+			System.out.println(args[0]);
 			// --- Create the dictionary objects ---//
 			System.out.println();
 			System.out.println(" . . . Loading NaivePrefixDictionary");
@@ -51,7 +52,7 @@ public class Test {
 				System.out.println(" . . . "
 						+ String.format("%15s", deltaDF.format(naiveDelta))
 						+ " ns");
-
+/*
 				// test fast dictionary
 				System.out.print(" - Fast  Sum = ");
 				start = System.nanoTime();
@@ -68,6 +69,7 @@ public class Test {
 				DecimalFormat speedupDF = new DecimalFormat("###.##");
 				System.out.println(" - Speedup = " + speedupDF.format(speedup));
 				System.out.println();
+*/
 			}
 		}
 	}
