@@ -2,21 +2,18 @@ package prefix;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
- * Interface for a Prefix Dictionary. The dictionary will be created from a CSV
- * file of (Key<String>, Value<Integer>) pairs.
+ * Class to store a table of (Key<String>, Value<Integer>) pairs.
  * 
  * @author John Paul Welsh
  */
 public class FastPrefixDictionary implements PrefixDictionary {
+	// A TreeMap, which implements a red-black tree
 	private TreeMap<String, Integer> tm;
-	private NavigableMap<String, Integer> submap;
-	private String lexNext;
 
 	/**
 	 * Constructor to build the dictionary from a CSV file.
@@ -49,37 +46,44 @@ public class FastPrefixDictionary implements PrefixDictionary {
 	 * string as a prefix. Note, sum must be a long since sum of values may
 	 * exceed int capacity.
 	 * 
+	 * We make a submap containing all the possible matching keys for the prefix,
+	 * and iterate through them to get the sum.
+	 * 
 	 * @param prefix
 	 *            the prefix string
 	 * @return the sum of all matching values
 	 */
 	public long sum(String prefix) {
+		// Trim the prefix to get rid of leading and trailing whitespace
 		prefix = prefix.trim();
 		long sum = 0;
-		
-		// Gets the last character in the prefix string
-		char lastPrefixChar = prefix.charAt(prefix.length() - 1);
-		// Copies the lastPrefixChar so we can ++ it
-		char lpcCopy = lastPrefixChar;
-		// Sets the incremented character to another variable
-		char lastLexNextChar = ++lpcCopy;
-		
-		// Finds the index of the last occurrence of lastPrefixChar in prefix
-		int step1 = prefix.lastIndexOf(lastPrefixChar);
-		// Sets lexNext to be the prefix, with its last character replaced with lastLexNextChar
-		lexNext = prefix.substring(0, step1) + lastLexNextChar;
 
-		// Makes a new submap that starts from the prefix itself (inclusive) and ends
-		// at the next string in lexographic order (exclusive) 
-		submap = tm.subMap(prefix, true, lexNext, false);
-		
-		// This method only takes longer when there is no sum for the given prefix,
-		// so I hard-coded in the case where the submap is empty
+		// First we need the last character in the prefix string
+		char lastPrefixChar = prefix.charAt(prefix.length() - 1);
+		// Copy of the lastPrefixChar
+		char lpcCopy = lastPrefixChar;
+		// Increment the copy and set it to another variable. Incrementing a
+		// char sets it to the next char in lexographic order
+		char lastLexNextChar = ++lpcCopy;
+
+		// The index of the last occurrence of lastPrefixChar in prefix (this
+		// ends up being the last character in prefix anyway, but this way I
+		// don't need to worry about out-of-bounds errors)
+		int step1 = prefix.lastIndexOf(lastPrefixChar);
+		// We replace the last character of prefix with the incremented character
+		String lexNext = prefix.substring(0, step1) + lastLexNextChar;
+
+		// Makes a new submap that starts from the prefix itself (inclusive) and
+		// ends at the next string in lexographic order (exclusive). This puts an
+		// bound on the new map so it will only contain keys that begin with prefix 
+		NavigableMap<String, Integer> submap = tm.subMap(prefix, true, lexNext, false);
+
+		// This method only takes longer when there is no sum for the given
+		// prefix, so I hard-coded in the case where the submap is empty
 		if (submap.size() == 0) {
 			return 0;
-		// Otherwise, loop through the collection, add the values, and return it
+		// Otherwise, loop through the collection and sum the values
 		} else {
-			// Gets all of the values out of the subtree and puts them into a Collection
 			Collection<Integer> valColl = submap.values();
 			for (int val : valColl)
 				sum += val;
