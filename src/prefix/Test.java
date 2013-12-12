@@ -52,7 +52,7 @@ public class Test {
 				System.out.println(" . . . "
 						+ String.format("%15s", deltaDF.format(naiveDelta))
 						+ " ns");
-/*
+
 				// test fast dictionary
 				System.out.print(" - Fast  Sum = ");
 				start = System.nanoTime();
@@ -69,7 +69,7 @@ public class Test {
 				DecimalFormat speedupDF = new DecimalFormat("###.##");
 				System.out.println(" - Speedup = " + speedupDF.format(speedup));
 				System.out.println();
-*/
+
 			}
 		}
 	}
