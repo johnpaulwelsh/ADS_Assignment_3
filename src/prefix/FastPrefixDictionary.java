@@ -9,6 +9,20 @@ import java.util.TreeMap;
 /**
  * Class to store a table of (Key<String>, Value<Integer>) pairs.
  * 
+ * My approach was to store the dictionaries in a TreeMap, which utilizes a
+ * red-black tree for storage and supplies fast retrieval times.
+ * 
+ * To find all matching keys for a given prefix, I used the TreeMap's function
+ * 'subMap', which has two versions. I used the one that takes in two binding
+ * strings and a boolean to determine whether the bounds were included in the
+ * submap. I made the submap range from the prefix itself, inclusive, to the
+ * next string that would not match prefix (the next lexographically greatest),
+ * exclusive. Since I could not anticipate how long a prefix could be, I found
+ * the first string that would not match and set the bound from there.
+ * 
+ * I then exported the values in that submap to a Collection using the function
+ * 'values', and iterating over the values, summed them together.
+ * 
  * @author John Paul Welsh
  */
 public class FastPrefixDictionary implements PrefixDictionary {
@@ -54,16 +68,13 @@ public class FastPrefixDictionary implements PrefixDictionary {
 	 * @return the sum of all matching values
 	 */
 	public long sum(String prefix) {
-		// Trim the prefix to get rid of leading and trailing whitespace
 		prefix = prefix.trim();
 		long sum = 0;
 
 		// First we need the last character in the prefix string
 		char lastPrefixChar = prefix.charAt(prefix.length() - 1);
-		// Copy of the lastPrefixChar
 		char lpcCopy = lastPrefixChar;
-		// Increment the copy and set it to another variable. Incrementing a
-		// char sets it to the next char in lexographic order
+		// Incrementing a char sets it to the next char in lexographic order
 		char lastLexNextChar = ++lpcCopy;
 
 		// The index of the last occurrence of lastPrefixChar in prefix (this
@@ -74,20 +85,13 @@ public class FastPrefixDictionary implements PrefixDictionary {
 		String lexNext = prefix.substring(0, step1) + lastLexNextChar;
 
 		// Makes a new submap that starts from the prefix itself (inclusive) and
-		// ends at the next string in lexographic order (exclusive). This puts an
-		// bound on the new map so it will only contain keys that begin with prefix 
+		// ends at the next string in lexographic order (exclusive)
 		NavigableMap<String, Integer> submap = tm.subMap(prefix, true, lexNext, false);
 
-		// This method only takes longer when there is no sum for the given
-		// prefix, so I hard-coded in the case where the submap is empty
-		if (submap.size() == 0) {
-			return 0;
-		// Otherwise, loop through the collection and sum the values
-		} else {
-			Collection<Integer> valColl = submap.values();
-			for (int val : valColl)
-				sum += val;
-			return sum;
-		}
+		// Loop through the collection and sum the values
+		Collection<Integer> valColl = submap.values();
+		for (int val : valColl)
+			sum += val;
+		return sum;
 	}
 }
